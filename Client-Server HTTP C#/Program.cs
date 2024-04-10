@@ -3,7 +3,7 @@
 HttpResponseMessage response;
 
 HttpClient httpClient = new HttpClient();
-Console.WriteLine("Тип запроса:");
+Console.WriteLine("Введите тип запроса:");
 string requestMethod = Console.ReadLine();
 
 switch (requestMethod)
