@@ -7,13 +7,13 @@ namespace Server
     {
        static string path = $"{Environment.CurrentDirectory}\\Data\\Employees.json";
 
-        public static IEnumerable<T> Load<T>()
-        { 
+        public static List<T> Load<T>()
+        {
             if (!File.Exists(path)) return new List<T>();
 
             string jsonString = File.ReadAllText(path);
 
-            List<T> deserializeData = JsonSerializer.Deserialize<List<T>>(jsonString);
+            var deserializeData = JsonSerializer.Deserialize<List<T>>(jsonString);
 
             return deserializeData;
         }

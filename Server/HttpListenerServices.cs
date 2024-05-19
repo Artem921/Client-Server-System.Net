@@ -3,7 +3,6 @@ using Newtonsoft.Json;
 using Server.Repository.Abstract;
 using System.Net;
 using System.Text;
-using System.Text.Json;
 
 namespace Server
 {
@@ -12,15 +11,16 @@ namespace Server
     { 
         private readonly HttpListener server;
 
-        private readonly  IEmployeesServices services;
+        private readonly  IEmployeesServices repository;
 
         private const string connection = "http://127.0.0.1:8888/";
 
         public HttpListenerServices(IEmployeesServices services)
         {
             this.server = new HttpListener();
-            this.services = services;
+            this.repository = services;
             Start();
+           
         }
 
         private void Start()
@@ -32,23 +32,8 @@ namespace Server
             server.Start();
         } 
 
-        private async Task GetAll(HttpListenerResponse response)
-        {
-            byte[] buffer = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(await services.GetAll()));
-            using (var stream = response.OutputStream)
-            {
-                await stream.WriteAsync(buffer);
-                await stream.FlushAsync();
-            }
-        }
 
-
-        private async Task Add(HttpListenerContext context)
-        {
-            //var employees = await System.Text.Json.JsonSerializer.DeserializeAsync<Employee>(context.Request.);
-        }
-
-        public async Task GetContext()
+        public async Task ListenerRequest()
         {  
 
             while (true)
@@ -57,32 +42,57 @@ namespace Server
               
                 var response = context.Response;
 
-                if (context.Request.HttpMethod=="GET")
+                var request = context.Request;
+
+                byte[] buffer;
+
+                switch (request.HttpMethod)
                 {
-                   GetAll(response);
-
-                }
-
-                if(context.Request.HttpMethod=="POST")
-                {
-                     var request = context.Request;
-
-                   
-
-                    using(Stream body = request.InputStream)
-                    {
-                        using(var reader = new StreamReader(body, request.ContentEncoding))
+                    case "GET":
+                        if (request.QueryString.Count == 0)
                         {
-                          
-                            Employee employee=JsonConvert.DeserializeObject<Employee>(reader.ReadToEnd());
-
-
-                            Console.WriteLine(employee.Name);
+                            buffer = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(await repository.GetAll()));
                         }
-                    }
 
+                        else buffer = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(await repository.GetById(Convert.ToInt32(request.QueryString["id"]))));
 
+                        using (var stream = response.OutputStream)
+                        {
+                            await stream.WriteAsync(buffer);
+                            await stream.FlushAsync();
+                        }
 
+                        break;
+
+                    case "POST":
+                        using (Stream body = request.InputStream)
+                        {
+                            using (var reader = new StreamReader(body, request.ContentEncoding))
+                            {
+
+                                Employee employee = JsonConvert.DeserializeObject<Employee>(reader.ReadToEnd());
+                                
+                                repository.Add(employee);
+                            }
+                        }
+                        break;
+
+                    case "PUT":
+                        using (Stream body = request.InputStream)
+                        {
+                            using (var reader = new StreamReader(body, request.ContentEncoding))
+                            {
+                                Employee employee = JsonConvert.DeserializeObject<Employee>(reader.ReadToEnd());
+
+                                repository.Update(employee);
+                            }
+                        }
+                        break;
+
+                    case "DELETE":
+                        int id = Convert.ToInt32(request.QueryString["id"]);
+                        await repository.Delete(id);
+                        break;
                 }
 
                 response.Close();

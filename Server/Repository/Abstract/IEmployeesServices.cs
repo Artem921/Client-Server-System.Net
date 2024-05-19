@@ -4,6 +4,14 @@ namespace Server.Repository.Abstract
 {
     public interface IEmployeesServices
     {
-        public  Task<IEnumerable<Employee>> GetAll();
+        public  Task<List<Employee>> GetAll();
+
+        public Task<Employee> GetById(int id);
+
+        public Task Add(Employee employee);
+
+        public Task Update(Employee employee);
+
+        public Task Delete(int id);
     }
 }
