@@ -18,17 +18,23 @@ namespace Client_Server_HTTP_C_.Client
 
         protected async Task<T> GeAlltAsync<T>() where T : new()
         {
-
-            using (var response = await httpClient.GetAsync(connection))
+            try
             {
+                var response = await httpClient.GetAsync(connection);
+
                 if (response.IsSuccessStatusCode)
                 {
                     return await System.Text.Json.JsonSerializer.DeserializeAsync<T>(await response.Content.ReadAsStreamAsync());
                 }
+            }
+            catch { }
+            {
+                Console.WriteLine("Нет соединения с сервером!");
+            }
 
                 return new T();
 
-            }
+            
         }
 
         public T Get<T>(string id) where T : new() => GetAsync<T>(id).Result;
@@ -39,36 +45,57 @@ namespace Client_Server_HTTP_C_.Client
             {
                 { "id", id.ToString() }
             };
-            using (var response = await httpClient.GetAsync($"{ connection}/?{queryString}")) 
-            { 
+            try
+            {
+                var response = await httpClient.GetAsync($"{connection}/?{queryString}");
+
 
                 if (response.IsSuccessStatusCode)
                 {
                     return await System.Text.Json.JsonSerializer.DeserializeAsync<T>(await response.Content.ReadAsStreamAsync());
                 }
-
-                return new T();
             }
+            catch { }
+            {
+                Console.WriteLine("Нет соединения с сервером!");
+            }
+
+            return new T();
+            
         }
 
         public HttpResponseMessage Post<T>( T item) => PostAsync( item).Result;
         protected async Task<HttpResponseMessage> PostAsync<T>( T item)
         {
-            using (var response = await httpClient.PostAsJsonAsync(connection, item))
+            try
             {
+                var response = await httpClient.PostAsJsonAsync(connection, item);
 
                 return response.EnsureSuccessStatusCode();
             }
+            catch { }
+            {
+                Console.WriteLine("Нет соединения с сервером!");
+            }
+            return new();
         }
 
 
         public HttpResponseMessage Put<T>( T item) => PutAsync( item).Result;
         protected async Task<HttpResponseMessage> PutAsync<T>( T item, CancellationToken cancel = default)
         {
-            using (var response = await httpClient.PutAsJsonAsync(connection, item))
+            try
             {
+                var response = await httpClient.PutAsJsonAsync(connection, item);
+
                 return response.EnsureSuccessStatusCode();
             }
+            catch { }
+            {
+                Console.WriteLine("Нет соединения с сервером!");
+            }
+
+            return new();
         }
 
 
@@ -79,11 +106,19 @@ namespace Client_Server_HTTP_C_.Client
             {
                 { "id", id.ToString() }
             };
-            using (var response = await httpClient.DeleteAsync($"{connection}/?{queryString}"))
+
+
+            try
             {
+                var response = await httpClient.DeleteAsync($"{connection}/?{queryString}");
+
                 return response.EnsureSuccessStatusCode();
             }
-               
+            catch { }
+            {
+                Console.WriteLine("Нет соединения с сервером!");
+            }
+            return new();
 
         }
 
