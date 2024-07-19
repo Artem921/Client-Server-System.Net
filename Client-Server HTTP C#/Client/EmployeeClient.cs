@@ -20,7 +20,7 @@ namespace Client_Server_HTTP_C_.Client
         {
             try
             {
-                var response = await httpClient.GetAsync(connection);
+                using var response = await httpClient.GetAsync(connection);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -47,7 +47,7 @@ namespace Client_Server_HTTP_C_.Client
             };
             try
             {
-                var response = await httpClient.GetAsync($"{connection}/?{queryString}");
+                using var response = await httpClient.GetAsync($"{connection}/?{queryString}");
 
 
                 if (response.IsSuccessStatusCode)
@@ -69,7 +69,7 @@ namespace Client_Server_HTTP_C_.Client
         {
             try
             {
-                var response = await httpClient.PostAsJsonAsync(connection, item);
+                using var response = await httpClient.PostAsJsonAsync(connection, item);
 
                 return response.EnsureSuccessStatusCode();
             }
@@ -86,7 +86,7 @@ namespace Client_Server_HTTP_C_.Client
         {
             try
             {
-                var response = await httpClient.PutAsJsonAsync(connection, item);
+                using var response = await httpClient.PutAsJsonAsync(connection, item);
 
                 return response.EnsureSuccessStatusCode();
             }
@@ -110,7 +110,7 @@ namespace Client_Server_HTTP_C_.Client
 
             try
             {
-                var response = await httpClient.DeleteAsync($"{connection}/?{queryString}");
+               using  var response = await httpClient.DeleteAsync($"{connection}/?{queryString}");
 
                 return response.EnsureSuccessStatusCode();
             }
